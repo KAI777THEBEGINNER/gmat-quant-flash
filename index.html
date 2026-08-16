@@ -362,9 +362,10 @@ function answer(k, btnEl) {
     state.last[current] = todayStr();
     delete state.wrongToday[current];
     state.doneToday++;
-    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>`;
+    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div><button class="btn" id="contBtn">继续</button>`;
+    document.getElementById("contBtn").onclick = () => nextQuestion();
+    updateProgress();
     save();
-    setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 1400);
   } else {
     streak = 0;
     btnEl.classList.add("wrong");

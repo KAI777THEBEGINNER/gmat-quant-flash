@@ -89,13 +89,16 @@ assert(correctIdx >= 0, "正确选项存在");
 assert(registry["en"].textContent === WORDS[cur()].en, "英文概念显示正确");
 assert(registry["example"].innerHTML.includes("<b>"), "例句高亮生效");
 
-// 3. 答对：box → 1，doneToday → 1，自动下一题
+// 3. 答对：box → 1，doneToday → 1，停留当前题并出现「继续」按钮（手动进入下一题）
 const firstWord = cur();
 optsEl.children[correctIdx].onclick();
 assert(state.box[firstWord] === 1, `答对后 box=1，实际 ${state.box[firstWord]}`);
 assert(state.doneToday === 1, `doneToday=1，实际 ${state.doneToday}`);
 assert(!(firstWord in state.wrongToday), "答对不进 wrongToday");
-assert(cur() !== firstWord, "已自动进入下一题");
+assert(cur() === firstWord, "答对后停留当前题，不自动跳");
+assert(registry["feedback"].innerHTML.includes("继续"), "答对出现继续按钮");
+registry["contBtn"].onclick();
+assert(cur() !== firstWord, "点继续进入下一题");
 
 // 4. 再答对一题
 {
@@ -104,6 +107,7 @@ assert(cur() !== firstWord, "已自动进入下一题");
   const w2 = cur();
   o2.children[c2].onclick();
   assert(state.box[w2] === 1 && state.doneToday === 2, "连续答对累计正确");
+  registry["contBtn"].onclick();
 }
 
 // 5. 答错：box → 0，wrongToday +1，词重回队列，出现「继续」按钮
