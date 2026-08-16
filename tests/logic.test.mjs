@@ -81,6 +81,7 @@ for (const w of WORDS) {
   assert(w.en && w.cn && w.hint && (w.example || w.latex) && w.cat, `词条字段完整: ${w.en}`);
   assert(CATEGORIES[w.cat], `cat 合法: ${w.en} → ${w.cat}`);
   if (w.latex) formulaCount++;
+  assert(Array.isArray(w.sec) && w.sec.length >= 1 && w.sec.every(s => ["quant","verbal","di"].includes(s)), `sec 字段合法: ${w.en}`);
 }
 assert(formulaCount >= 50, `公式题至少 50 条，实际 ${formulaCount}`);
 assert(Object.keys(state.box).length === 0, "初始 box 为空");
