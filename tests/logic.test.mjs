@@ -31,10 +31,12 @@ class El {
 }
 
 const registry = {};
+const docEl = new El("html");
 globalThis.document = {
   getElementById: (id) => (registry[id] ??= new El(id)),
   createElement: (tag) => { const e = new El(); e.tagName = tag; return e; },
   querySelectorAll: () => [],
+  documentElement: docEl,
 };
 globalThis.registry = registry;
 
