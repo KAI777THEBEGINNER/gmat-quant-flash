@@ -9,9 +9,9 @@
 <title>GMAT Quant Flash</title>
 <style>
   :root {
-    --bg: #faf9f6; --card: #ffffff; --ink: #1d1d1f; --muted: #8e8e93;
-    --accent: #0a7b3c; --accent-soft: #e6f4ec; --red: #d64545; --red-soft: #fbeaea;
-    --border: #e5e4e0; --radius: 16px;
+    --bg: #f5f5f7; --card: #ffffff; --ink: #111111; --muted: #86868b;
+    --green: #1a9e4b; --green-soft: #e8f5ec; --red: #d64545; --red-soft: #fdecec;
+    --border: #e4e4e6; --radius: 14px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
@@ -26,56 +26,60 @@
     position: sticky; top: 0; z-index: 10;
   }
   .toprow { display: flex; align-items: center; gap: 10px; }
-  .bar { flex: 1; height: 6px; background: #ececea; border-radius: 3px; overflow: hidden; }
-  .bar > div { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+  .bar { flex: 1; height: 5px; background: #ececef; border-radius: 3px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--green); border-radius: 3px; transition: width .3s; }
   .progress-num { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .gear { border: none; background: none; font-size: 18px; cursor: pointer; color: var(--muted); padding: 2px; }
+  .gear { border: none; background: none; cursor: pointer; color: var(--muted); padding: 4px; display: flex; }
+  .gear svg { width: 20px; height: 20px; }
 
-  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; }
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 20px; }
   .card { width: 100%; max-width: 560px; }
   .en {
-    font-size: clamp(26px, 6.5vw, 40px); font-weight: 700; letter-spacing: -.02em;
+    font-size: clamp(28px, 7vw, 42px); font-weight: 700; letter-spacing: -.02em;
     text-align: center; line-height: 1.25;
   }
   .example {
-    margin-top: 14px; text-align: center; color: var(--muted);
-    font-size: clamp(14px, 3.8vw, 17px); line-height: 1.5; font-style: italic;
+    margin-top: 16px; text-align: center; color: var(--muted);
+    font-size: clamp(14px, 3.8vw, 17px); line-height: 1.55; font-style: italic;
   }
   .example b { color: var(--ink); font-style: normal; }
   .cat-tag {
-    display: inline-block; margin-top: 12px; font-size: 11px; color: var(--accent);
-    background: var(--accent-soft); padding: 2px 10px; border-radius: 999px;
+    display: inline-block; margin-top: 14px; font-size: 11px; color: #55555a;
+    background: #ececf0; padding: 2px 10px; border-radius: 999px;
   }
 
-  .options { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .options.one-col { grid-template-columns: 1fr; }
+  .options { margin-top: 28px; display: grid; grid-template-columns: 1fr; gap: 12px; }
   .opt {
-    border: 2px solid var(--border); background: var(--card); border-radius: var(--radius);
-    padding: 16px 12px; font-size: clamp(15px, 4vw, 18px); font-weight: 600;
+    border: 1.5px solid var(--border); background: var(--card); border-radius: var(--radius);
+    padding: 18px 22px; font-size: clamp(16px, 4.5vw, 20px); font-weight: 600;
     cursor: pointer; transition: transform .08s, border-color .12s, background .12s;
-    text-align: center; color: var(--ink);
+    text-align: left; color: var(--ink); width: 100%;
   }
-  .opt:active { transform: scale(.97); }
-  .opt.correct { border-color: var(--accent); background: var(--accent-soft); animation: pop .25s; }
+  .opt:active { transform: scale(.98); }
+  .opt.correct { border-color: var(--green); background: var(--green-soft); animation: pop .25s; }
   .opt.wrong { border-color: var(--red); background: var(--red-soft); animation: shake .3s; }
-  @keyframes pop { 50% { transform: scale(1.04); } }
+  @keyframes pop { 50% { transform: scale(1.02); } }
   @keyframes shake { 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
 
   .feedback {
-    margin-top: 18px; min-height: 40px; display: flex; flex-direction: column; gap: 6px;
+    margin-top: 20px; min-height: 44px; display: flex; flex-direction: column; gap: 8px;
     align-items: center; text-align: center;
   }
-  .fb-hint { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .fb-hint { font-size: 15px; color: var(--muted); line-height: 1.55; }
   .fb-hint b { color: var(--ink); }
+  .fb-hint svg { width: 16px; height: 16px; vertical-align: -2px; }
+  .fb-ok svg { color: var(--green); }
+  .fb-no svg { color: var(--red); }
   .btn {
-    border: none; background: var(--accent); color: #fff; font-size: 16px; font-weight: 600;
-    padding: 12px 40px; border-radius: 999px; cursor: pointer; margin-top: 8px;
+    border: none; background: var(--ink); color: #fff; font-size: 16px; font-weight: 600;
+    padding: 13px 44px; border-radius: 999px; cursor: pointer; margin-top: 10px;
   }
   .btn:active { transform: scale(.97); }
 
   .done-wrap { text-align: center; padding: 40px 20px; }
-  .done-wrap h2 { font-size: 26px; }
-  .done-wrap p { margin-top: 10px; color: var(--muted); line-height: 1.6; }
+  .done-wrap h2 { font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .done-wrap h2 svg { width: 28px; height: 28px; color: var(--green); }
+  .done-wrap p { margin-top: 12px; color: var(--muted); line-height: 1.7; }
 
   #settings {
     position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 50;
@@ -92,7 +96,7 @@
     border: 1.5px solid var(--border); background: var(--card); border-radius: 999px;
     padding: 8px 14px; font-size: 14px; cursor: pointer; color: var(--ink);
   }
-  .chip.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .chip.on { border-color: var(--ink); background: var(--ink); color: #fff; font-weight: 600; }
   .sheet .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); font-size: 15px; }
   .sheet .row .val { color: var(--muted); font-size: 13px; }
   .danger { color: var(--red); background: none; border: none; font-size: 15px; cursor: pointer; padding: 0; }
@@ -103,7 +107,7 @@
   <div class="toprow">
     <div class="bar"><div id="barFill" style="width:0%"></div></div>
     <span class="progress-num" id="progressNum">0 / 0</span>
-    <button class="gear" id="gearBtn" aria-label="设置">⚙︎</button>
+    <button class="gear" id="gearBtn" aria-label="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
   </div>
 </header>
 
@@ -119,7 +123,7 @@
   </div>
 
   <div class="done-wrap" id="doneWrap" hidden>
-    <h2 id="doneTitle">今日队列刷完 🎉</h2>
+    <h2 id="doneTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>今日队列刷完</h2>
     <p id="doneDesc"></p>
     <button class="btn" id="againBtn">再刷一轮错词</button>
   </div>
@@ -141,6 +145,8 @@
 const LS_KEY = "gqf_state_v1";
 const BOX_DAYS = { 1: 1, 2: 3, 3: 7 };   // box → 间隔天数；box 4 = 掌握
 const DAY = 86400000;
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
 // ---------- 状态 ----------
 function todayStr() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
@@ -214,7 +220,6 @@ function nextQuestion() {
   document.getElementById("catTag").textContent = CATEGORIES[WORDS[current].cat];
   const box = document.getElementById("options");
   box.innerHTML = "";
-  box.classList.toggle("one-col", opts.some(o => o.cn.length > 7));
   opts.forEach((o, k) => {
     const b = document.createElement("button");
     b.className = "opt";
@@ -269,7 +274,7 @@ function answer(k, btnEl) {
     state.last[current] = todayStr();
     delete state.wrongToday[current];
     state.doneToday++;
-    fb.innerHTML = `<div class="fb-hint">✓ <b>${w.cn}</b> — ${w.hint}</div>`;
+    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>`;
     save();
     setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 900);
   } else {
@@ -283,7 +288,7 @@ function answer(k, btnEl) {
     save();
     sessionWrong.push(current);
     queue.push(current);  // 当日重现
-    fb.innerHTML = `<div class="fb-hint">正确：<b>${w.cn}</b><br>${w.hint}</div><button class="btn" id="contBtn">继续</button>`;
+    fb.innerHTML = `<div class="fb-hint fb-no">${ICON_X} 正确：<b>${w.cn}</b><br>${w.hint}</div><button class="btn" id="contBtn">继续</button>`;
     document.getElementById("contBtn").onclick = () => nextQuestion();
     updateProgress();
   }
