@@ -51,10 +51,14 @@
   .options { margin-top: 28px; display: grid; grid-template-columns: 1fr; gap: 12px; }
   .opt {
     border: 1.5px solid var(--border); background: var(--card); border-radius: var(--radius);
-    padding: 18px 22px; font-size: clamp(16px, 4.5vw, 20px); font-weight: 600;
+    padding: 14px 22px; font-size: clamp(16px, 4.5vw, 20px); font-weight: 600;
     cursor: pointer; transition: transform .08s, border-color .12s, background .12s;
     text-align: left; color: var(--ink); width: 100%;
+    display: flex; flex-direction: column; gap: 3px; align-items: flex-start;
   }
+  .opt-en { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .opt.correct .opt-en { color: var(--green); font-weight: 600; }
+  .opt.wrong .opt-en { color: var(--red); font-weight: 600; }
   .opt:active { transform: scale(.98); }
   .opt.correct { border-color: var(--green); background: var(--green-soft); animation: pop .3s; box-shadow: 0 0 0 5px rgba(26,158,75,.14); }
   .opt.wrong { border-color: var(--red); background: var(--red-soft); animation: shake .3s; }
@@ -304,14 +308,14 @@ function nextQuestion() {
 
 function buildOptions(idx) {
   const correct = WORDS[idx];
-  const pool = WORDS.map((w, i) => ({ cn: w.cn, i }))
+  const pool = WORDS.map((w, i) => ({ cn: w.cn, en: w.en, i }))
     .filter(w => w.i !== idx && w.cn !== correct.cn && state.cats.includes(WORDS[w.i].cat));
   const picked = [];
   while (picked.length < 3 && pool.length) {
     const k = Math.floor(Math.random() * pool.length);
     picked.push(pool.splice(k, 1)[0]);
   }
-  const out = [{ cn: correct.cn, ok: true }, ...picked.map(p => ({ cn: p.cn, ok: false }))];
+  const out = [{ cn: correct.cn, en: correct.en, ok: true }, ...picked.map(p => ({ cn: p.cn, en: p.en, ok: false }))];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [out[i], out[j]] = [out[j], out[i]];
@@ -343,6 +347,10 @@ function answer(k, btnEl) {
   const fb = document.getElementById("feedback");
   const btns = document.querySelectorAll(".opt");
   btns.forEach(b => { b.style.pointerEvents = "none"; });
+  // 作答后：四个选项全部展示「中文 + 对应英文」配对
+  btns.forEach((b, i) => {
+    b.innerHTML = `<span>${opts[i].cn}</span><span class="opt-en">${opts[i].en}</span>`;
+  });
 
   if (opts[k].ok) {
     btnEl.classList.add("correct");
@@ -356,7 +364,7 @@ function answer(k, btnEl) {
     state.doneToday++;
     fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>`;
     save();
-    setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 900);
+    setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 1400);
   } else {
     streak = 0;
     btnEl.classList.add("wrong");
