@@ -56,20 +56,35 @@
     text-align: left; color: var(--ink); width: 100%;
   }
   .opt:active { transform: scale(.98); }
-  .opt.correct { border-color: var(--green); background: var(--green-soft); animation: pop .25s; }
+  .opt.correct { border-color: var(--green); background: var(--green-soft); animation: pop .3s; }
   .opt.wrong { border-color: var(--red); background: var(--red-soft); animation: shake .3s; }
-  @keyframes pop { 50% { transform: scale(1.02); } }
+  @keyframes pop { 40% { transform: scale(1.04); } }
   @keyframes shake { 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
+
+  /* 题目切换过渡：新题上浮淡入 + 高斯模糊消散 */
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+  }
+  .quiz-anim { animation: cardIn .32s cubic-bezier(.2, .7, .3, 1); }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  #doneWrap:not([hidden]) { animation: cardIn .4s cubic-bezier(.2, .7, .3, 1); }
 
   .feedback {
     margin-top: 20px; min-height: 44px; display: flex; flex-direction: column; gap: 8px;
     align-items: center; text-align: center;
   }
-  .fb-hint { font-size: 15px; color: var(--muted); line-height: 1.55; }
+  .fb-hint { font-size: 15px; color: var(--muted); line-height: 1.55; animation: fadeIn .35s; }
   .fb-hint b { color: var(--ink); }
   .fb-hint svg { width: 16px; height: 16px; vertical-align: -2px; }
   .fb-ok svg { color: var(--green); }
   .fb-no svg { color: var(--red); }
+  .streak {
+    display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600;
+    color: var(--red); animation: fadeIn .4s;
+  }
+  .streak svg { width: 14px; height: 14px; }
   .btn {
     border: none; background: var(--ink); color: #fff; font-size: 16px; font-weight: 600;
     padding: 13px 44px; border-radius: 999px; cursor: pointer; margin-top: 10px;
@@ -86,6 +101,9 @@
     display: none; align-items: flex-end; justify-content: center;
   }
   #settings.open { display: flex; }
+  #settings.open .sheet { animation: sheetUp .28s cubic-bezier(.2, .7, .3, 1); }
+  @keyframes sheetUp { from { transform: translateY(60px); opacity: .3; } to { transform: none; opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .sheet {
     background: var(--card); width: 100%; max-width: 560px;
     border-radius: 20px 20px 0 0; padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
@@ -100,6 +118,11 @@
   .sheet .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); font-size: 15px; }
   .sheet .row .val { color: var(--muted); font-size: 13px; }
   .danger { color: var(--red); background: none; border: none; font-size: 15px; cursor: pointer; padding: 0; }
+
+  /* 尊重系统减弱动效设置 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -147,6 +170,7 @@ const BOX_DAYS = { 1: 1, 2: 3, 3: 7 };   // box → 间隔天数；box 4 = 掌�
 const DAY = 86400000;
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const ICON_FLAME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
 
 // ---------- 状态 ----------
 function todayStr() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
@@ -170,6 +194,7 @@ let current = null;  // 当前词条索引
 let opts = [];       // 当前选项
 let answered = false;
 let sessionWrong = []; // 本轮答错的词
+let streak = 0;         // 连对计数（会话级，退出清零）
 
 function daysSince(last) { return Math.floor((Date.now() - new Date(last).getTime()) / DAY); }
 function buildQueue() {
@@ -214,6 +239,10 @@ function nextQuestion() {
   current = queue.shift();
   answered = false;
   opts = buildOptions(current);
+  const qz = document.getElementById("quiz");
+  qz.classList.remove("quiz-anim");
+  void qz.offsetWidth;   // 强制 reflow，重启动画
+  qz.classList.add("quiz-anim");
   document.getElementById("en").textContent = WORDS[current].en;
   const ex = document.getElementById("example");
   ex.innerHTML = highlightEn(WORDS[current].example, WORDS[current].en);
@@ -268,16 +297,19 @@ function answer(k, btnEl) {
 
   if (opts[k].ok) {
     btnEl.classList.add("correct");
+    streak++;
     // 答对：进下一级 box
     const b = state.box[current] || 0;
     state.box[current] = Math.min(4, b + 1);
     state.last[current] = todayStr();
     delete state.wrongToday[current];
     state.doneToday++;
-    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>`;
+    const streakHtml = streak >= 2 ? `<div class="streak">${ICON_FLAME} 连对 ${streak} 题</div>` : "";
+    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>${streakHtml}`;
     save();
     setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 900);
   } else {
+    streak = 0;
     btnEl.classList.add("wrong");
     const correctBtn = [...btns].find((b, i) => opts[i].ok);
     if (correctBtn) correctBtn.classList.add("correct");

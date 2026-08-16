@@ -10,11 +10,13 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 class El {
   constructor(id) {
     this.id = id; this.tagName = "div";
-    this.innerHTML = ""; this.textContent = ""; this.hidden = false;
+    this.textContent = ""; this.hidden = false;
     this.style = {}; this.dataset = {}; this.onclick = null;
     this._classes = new Set(); this.children = []; this.parent = null;
-    this.value = "";
+    this.value = ""; this._html = "";
   }
+  get innerHTML() { return this._html; }
+  set innerHTML(v) { this._html = v; this.children.length = 0; }  // 模拟真实 DOM：赋值即清空子元素
   get classList() {
     return {
       add: (c) => this._classes.add(c),
