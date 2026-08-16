@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GMAT Quant">
+<title>GMAT Quant Flash</title>
+<style>
+  :root {
+    --bg: #faf9f6; --card: #ffffff; --ink: #1d1d1f; --muted: #8e8e93;
+    --accent: #0a7b3c; --accent-soft: #e6f4ec; --red: #d64545; --red-soft: #fbeaea;
+    --border: #e5e4e0; --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    display: flex; flex-direction: column; min-height: 100dvh;
+  }
+  header {
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .toprow { display: flex; align-items: center; gap: 10px; }
+  .bar { flex: 1; height: 6px; background: #ececea; border-radius: 3px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+  .progress-num { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .gear { border: none; background: none; font-size: 18px; cursor: pointer; color: var(--muted); padding: 2px; }
+
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; }
+  .card { width: 100%; max-width: 560px; }
+  .en {
+    font-size: clamp(26px, 6.5vw, 40px); font-weight: 700; letter-spacing: -.02em;
+    text-align: center; line-height: 1.25;
+  }
+  .example {
+    margin-top: 14px; text-align: center; color: var(--muted);
+    font-size: clamp(14px, 3.8vw, 17px); line-height: 1.5; font-style: italic;
+  }
+  .example b { color: var(--ink); font-style: normal; }
+  .cat-tag {
+    display: inline-block; margin-top: 12px; font-size: 11px; color: var(--accent);
+    background: var(--accent-soft); padding: 2px 10px; border-radius: 999px;
+  }
+
+  .options { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .options.one-col { grid-template-columns: 1fr; }
+  .opt {
+    border: 2px solid var(--border); background: var(--card); border-radius: var(--radius);
+    padding: 16px 12px; font-size: clamp(15px, 4vw, 18px); font-weight: 600;
+    cursor: pointer; transition: transform .08s, border-color .12s, background .12s;
+    text-align: center; color: var(--ink);
+  }
+  .opt:active { transform: scale(.97); }
+  .opt.correct { border-color: var(--accent); background: var(--accent-soft); animation: pop .25s; }
+  .opt.wrong { border-color: var(--red); background: var(--red-soft); animation: shake .3s; }
+  @keyframes pop { 50% { transform: scale(1.04); } }
+  @keyframes shake { 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
+
+  .feedback {
+    margin-top: 18px; min-height: 40px; display: flex; flex-direction: column; gap: 6px;
+    align-items: center; text-align: center;
+  }
+  .fb-hint { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .fb-hint b { color: var(--ink); }
+  .btn {
+    border: none; background: var(--accent); color: #fff; font-size: 16px; font-weight: 600;
+    padding: 12px 40px; border-radius: 999px; cursor: pointer; margin-top: 8px;
+  }
+  .btn:active { transform: scale(.97); }
+
+  .done-wrap { text-align: center; padding: 40px 20px; }
+  .done-wrap h2 { font-size: 26px; }
+  .done-wrap p { margin-top: 10px; color: var(--muted); line-height: 1.6; }
+
+  #settings {
+    position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 50;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  #settings.open { display: flex; }
+  .sheet {
+    background: var(--card); width: 100%; max-width: 560px;
+    border-radius: 20px 20px 0 0; padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+  }
+  .sheet h3 { font-size: 17px; margin-bottom: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .chip {
+    border: 1.5px solid var(--border); background: var(--card); border-radius: 999px;
+    padding: 8px 14px; font-size: 14px; cursor: pointer; color: var(--ink);
+  }
+  .chip.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .sheet .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); font-size: 15px; }
+  .sheet .row .val { color: var(--muted); font-size: 13px; }
+  .danger { color: var(--red); background: none; border: none; font-size: 15px; cursor: pointer; padding: 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="toprow">
+    <div class="bar"><div id="barFill" style="width:0%"></div></div>
+    <span class="progress-num" id="progressNum">0 / 0</span>
+    <button class="gear" id="gearBtn" aria-label="设置">⚙︎</button>
+  </div>
+</header>
+
+<main id="main">
+  <div class="card" id="quiz" hidden>
+    <div style="text-align:center">
+      <div class="en" id="en"></div>
+      <div class="example" id="example"></div>
+      <span class="cat-tag" id="catTag"></span>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="done-wrap" id="doneWrap" hidden>
+    <h2 id="doneTitle">今日队列刷完 🎉</h2>
+    <p id="doneDesc"></p>
+    <button class="btn" id="againBtn">再刷一轮错词</button>
+  </div>
+</main>
+
+<div id="settings">
+  <div class="sheet">
+    <h3>设置</h3>
+    <div class="chips" id="catChips"></div>
+    <div class="row"><span>词库掌握度</span><span class="val" id="masteryVal">—</span></div>
+    <div class="row"><span>今日已刷</span><span class="val" id="todayVal">—</span></div>
+    <div class="row" style="border-bottom:1px solid var(--border)"><span>进度数据</span><button class="danger" id="resetBtn">重置全部进度</button></div>
+  </div>
+</div>
+
+<script src="words.js"></script>
+<script>
+"use strict";
+const LS_KEY = "gqf_state_v1";
+const BOX_DAYS = { 1: 1, 2: 3, 3: 7 };   // box → 间隔天数；box 4 = 掌握
+const DAY = 86400000;
+
+// ---------- 状态 ----------
+function todayStr() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
+function defaultState() {
+  return { box: {}, last: {}, wrongToday: {}, doneToday: 0, date: todayStr(), cats: ["number","algebra","geometry","stats","prob","word"] };
+}
+let state = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+    if (!s) return defaultState();
+    if (s.date !== todayStr()) { s.wrongToday = {}; s.doneToday = 0; s.date = todayStr(); }
+    if (!s.cats || !s.cats.length) s.cats = Object.keys(CATEGORIES);
+    return s;
+  } catch { return defaultState(); }
+})();
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+// ---------- 队列 ----------
+let queue = [];      // 词库索引
+let current = null;  // 当前词条索引
+let opts = [];       // 当前选项
+let answered = false;
+let sessionWrong = []; // 本轮答错的词
+
+function daysSince(last) { return Math.floor((Date.now() - new Date(last).getTime()) / DAY); }
+function buildQueue() {
+  const now = todayStr();
+  const q = [];
+  const seen = new Set();
+  for (let i = 0; i < WORDS.length; i++) {
+    if (!state.cats.includes(WORDS[i].cat)) continue;
+    const b = state.box[i] || 0;
+    if (b === 4) continue;                          // 已掌握
+    if (b === 0) { q.push(i); continue; }           // 新词 / 未掌握
+    const dueDays = BOX_DAYS[b] || 7;
+    if (daysSince(state.last[i] || now) >= dueDays) q.push(i);  // 到期复习
+  }
+  // 今日错词优先：排前面，权重 2（出现两次）
+  for (const i of Object.keys(state.wrongToday)) {
+    const idx = Number(i);
+    if (state.box[idx] === 4 || !state.cats.includes(WORDS[idx].cat)) continue;
+    if (!seen.has(idx)) { q.unshift(idx); q.push(idx); seen.add(idx); }
+  }
+  // 洗牌
+  for (let i = q.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [q[i], q[j]] = [q[j], q[i]];
+  }
+  queue = q;
+  sessionWrong = [];
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = queue.length + (current !== null && !queue.includes(current) ? 0 : 0);
+  const left = queue.length;
+  const done = Math.max(0, state.doneToday);
+  document.getElementById("progressNum").textContent = done + " / " + (done + left);
+  const pct = done + left === 0 ? 100 : Math.round(done / (done + left) * 100);
+  document.getElementById("barFill").style.width = pct + "%";
+}
+
+function nextQuestion() {
+  if (!queue.length) { showDone(); return; }
+  current = queue.shift();
+  answered = false;
+  opts = buildOptions(current);
+  document.getElementById("en").textContent = WORDS[current].en;
+  const ex = document.getElementById("example");
+  ex.innerHTML = highlightEn(WORDS[current].example, WORDS[current].en);
+  document.getElementById("catTag").textContent = CATEGORIES[WORDS[current].cat];
+  const box = document.getElementById("options");
+  box.innerHTML = "";
+  box.classList.toggle("one-col", opts.some(o => o.cn.length > 7));
+  opts.forEach((o, k) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = o.cn;
+    b.onclick = () => answer(k, b);
+    box.appendChild(b);
+  });
+  document.getElementById("feedback").innerHTML = "";
+  document.getElementById("quiz").hidden = false;
+  document.getElementById("doneWrap").hidden = true;
+  updateProgress();
+}
+
+function buildOptions(idx) {
+  const correct = WORDS[idx];
+  const pool = WORDS.map((w, i) => ({ cn: w.cn, i }))
+    .filter(w => w.i !== idx && w.cn !== correct.cn && state.cats.includes(WORDS[w.i].cat));
+  const picked = [];
+  while (picked.length < 3 && pool.length) {
+    const k = Math.floor(Math.random() * pool.length);
+    picked.push(pool.splice(k, 1)[0]);
+  }
+  const out = [{ cn: correct.cn, ok: true }, ...picked.map(p => ({ cn: p.cn, ok: false }))];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+// 例句里高亮概念词（取 en 去掉 (verb) 等说明后的核心）
+function highlightEn(example, en) {
+  const core = en.replace(/\s*\(.*?\)\s*/g, "").trim();
+  const esc = core.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp("(" + esc.split(" ").map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[^A-Za-z0-9]*") + ")", "gi");
+  return example.replace(re, "<b>$1</b>");
+}
+
+function answer(k, btnEl) {
+  if (answered) return;
+  answered = true;
+  const w = WORDS[current];
+  const fb = document.getElementById("feedback");
+  const btns = document.querySelectorAll(".opt");
+  btns.forEach(b => { b.style.pointerEvents = "none"; });
+
+  if (opts[k].ok) {
+    btnEl.classList.add("correct");
+    // 答对：进下一级 box
+    const b = state.box[current] || 0;
+    state.box[current] = Math.min(4, b + 1);
+    state.last[current] = todayStr();
+    delete state.wrongToday[current];
+    state.doneToday++;
+    fb.innerHTML = `<div class="fb-hint">✓ <b>${w.cn}</b> — ${w.hint}</div>`;
+    save();
+    setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 900);
+  } else {
+    btnEl.classList.add("wrong");
+    const correctBtn = [...btns].find((b, i) => opts[i].ok);
+    if (correctBtn) correctBtn.classList.add("correct");
+    // 答错：退回 box 0，当日重练
+    state.box[current] = 0;
+    state.wrongToday[current] = (state.wrongToday[current] || 0) + 1;
+    state.doneToday++;
+    save();
+    sessionWrong.push(current);
+    queue.push(current);  // 当日重现
+    fb.innerHTML = `<div class="fb-hint">正确：<b>${w.cn}</b><br>${w.hint}</div><button class="btn" id="contBtn">继续</button>`;
+    document.getElementById("contBtn").onclick = () => nextQuestion();
+    updateProgress();
+  }
+}
+
+function showDone() {
+  document.getElementById("quiz").hidden = true;
+  document.getElementById("doneWrap").hidden = false;
+  const mastered = Object.values(state.box).filter(b => b === 4).length;
+  const total = WORDS.filter(w => state.cats.includes(w.cat)).length;
+  const wrongN = sessionWrong.length;
+  document.getElementById("doneDesc").innerHTML =
+    `本轮答错 ${wrongN} 个（已重新排进队列）<br>掌握度：${mastered} / ${total}` +
+    (wrongN === 0 && mastered === total ? "<br>全部掌握，去刷真题吧！" : "");
+  updateProgress();
+}
+
+// ---------- 设置 ----------
+function renderChips() {
+  const box = document.getElementById("catChips");
+  box.innerHTML = "";
+  for (const [key, name] of Object.entries(CATEGORIES)) {
+    const c = document.createElement("button");
+    c.className = "chip" + (state.cats.includes(key) ? " on" : "");
+    c.textContent = name;
+    c.onclick = () => {
+      if (state.cats.includes(key)) {
+        if (state.cats.length === 1) return;
+        state.cats = state.cats.filter(x => x !== key);
+      } else state.cats.push(key);
+      save(); renderChips(); renderStats(); buildQueue();
+      if (current === null || !queue.length) nextQuestion();
+    };
+    box.appendChild(c);
+  }
+}
+function renderStats() {
+  const inCats = WORDS.filter(w => state.cats.includes(w.cat)).length;
+  const mastered = Object.values(state.box).filter(b => b === 4).length;
+  document.getElementById("masteryVal").textContent = mastered + " / " + inCats;
+  document.getElementById("todayVal").textContent = String(state.doneToday);
+}
+
+document.getElementById("gearBtn").onclick = () => document.getElementById("settings").classList.add("open");
+document.getElementById("settings").onclick = e => { if (e.target.id === "settings") e.target.classList.remove("open"); };
+document.getElementById("resetBtn").onclick = () => {
+  if (confirm("确认重置全部刷题进度？词库本身不受影响。")) {
+    state = defaultState(); save(); renderChips(); renderStats(); buildQueue(); nextQuestion();
+    document.getElementById("settings").classList.remove("open");
+  }
+};
+document.getElementById("againBtn").onclick = () => {
+  // 错词重练：把今日错词再排一轮
+  const again = sessionWrong.length ? sessionWrong : Object.keys(state.wrongToday).map(Number);
+  queue = [...new Set(again)];
+  if (!queue.length) { buildQueue(); }
+  nextQuestion();
+};
+
+// ---------- 启动 ----------
+renderChips();
+renderStats();
+buildQueue();
+nextQuestion();
+</script>
+</body>
+</html>
