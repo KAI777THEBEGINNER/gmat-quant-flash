@@ -56,9 +56,9 @@
     text-align: left; color: var(--ink); width: 100%;
   }
   .opt:active { transform: scale(.98); }
-  .opt.correct { border-color: var(--green); background: var(--green-soft); animation: pop .3s; }
+  .opt.correct { border-color: var(--green); background: var(--green-soft); animation: pop .3s; box-shadow: 0 0 0 5px rgba(26,158,75,.14); }
   .opt.wrong { border-color: var(--red); background: var(--red-soft); animation: shake .3s; }
-  @keyframes pop { 40% { transform: scale(1.04); } }
+  @keyframes pop { 40% { transform: scale(1.05); } }
   @keyframes shake { 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
 
   /* 题目切换过渡：新题上浮淡入 + 高斯模糊消散 */
@@ -85,6 +85,41 @@
     color: var(--red); animation: fadeIn .4s;
   }
   .streak svg { width: 14px; height: 14px; }
+
+  /* 答对庆祝徽章：中央弹出，0.9s 生命周期与自动下一题对齐 */
+  .celebration {
+    position: fixed; inset: 0; z-index: 100; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; opacity: 0; transition: opacity .12s;
+  }
+  .celebration.play { opacity: 1; }
+  .cele-icon {
+    width: 92px; height: 92px; border-radius: 50%; background: var(--green); color: #fff;
+    display: flex; align-items: center; justify-content: center; opacity: 0;
+    box-shadow: 0 10px 44px rgba(26,158,75,.5);
+  }
+  .cele-icon svg { width: 50px; height: 50px; }
+  .celebration.play .cele-icon { animation: celeFull .9s cubic-bezier(.2, 1.2, .3, 1) forwards; }
+  @keyframes celeFull {
+    0%   { transform: scale(.2); opacity: 0; }
+    28%  { transform: scale(1.14); opacity: 1; }
+    42%  { transform: scale(.96); }
+    55%  { transform: scale(1); opacity: 1; }
+    82%  { opacity: 1; }
+    100% { transform: scale(1.06); opacity: 0; }
+  }
+  .cele-streak {
+    display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 700;
+    color: var(--red); opacity: 0; text-shadow: 0 1px 12px rgba(255,255,255,.9);
+  }
+  .cele-streak svg { width: 20px; height: 20px; }
+  .celebration.play .cele-streak { animation: celeStreakFade .9s forwards; }
+  @keyframes celeStreakFade {
+    0% { opacity: 0; transform: translateY(8px); }
+    30% { opacity: 1; transform: none; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
   .btn {
     border: none; background: var(--ink); color: #fff; font-size: 16px; font-weight: 600;
     padding: 13px 44px; border-radius: 999px; cursor: pointer; margin-top: 10px;
@@ -149,6 +184,11 @@
     <h2 id="doneTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>今日队列刷完</h2>
     <p id="doneDesc"></p>
     <button class="btn" id="againBtn">再刷一轮错词</button>
+  </div>
+
+  <div class="celebration" id="celebration">
+    <div class="cele-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <div class="cele-streak" id="celeStreak"></div>
   </div>
 </main>
 
@@ -287,6 +327,15 @@ function highlightEn(example, en) {
   return example.replace(re, "<b>$1</b>");
 }
 
+function celebrate(n) {
+  const c = document.getElementById("celebration");
+  document.getElementById("celeStreak").innerHTML = n >= 2 ? `${ICON_FLAME} 连对 ${n} 题` : "";
+  c.classList.remove("play");
+  void c.offsetWidth;
+  c.classList.add("play");
+  setTimeout(() => c.classList.remove("play"), 950);
+}
+
 function answer(k, btnEl) {
   if (answered) return;
   answered = true;
@@ -298,14 +347,14 @@ function answer(k, btnEl) {
   if (opts[k].ok) {
     btnEl.classList.add("correct");
     streak++;
+    celebrate(streak);
     // 答对：进下一级 box
     const b = state.box[current] || 0;
     state.box[current] = Math.min(4, b + 1);
     state.last[current] = todayStr();
     delete state.wrongToday[current];
     state.doneToday++;
-    const streakHtml = streak >= 2 ? `<div class="streak">${ICON_FLAME} 连对 ${streak} 题</div>` : "";
-    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>${streakHtml}`;
+    fb.innerHTML = `<div class="fb-hint fb-ok">${ICON_CHECK}<b>${w.cn}</b> — ${w.hint}</div>`;
     save();
     setTimeout(() => { if (!queue.length) showDone(); else nextQuestion(); }, 900);
   } else {
