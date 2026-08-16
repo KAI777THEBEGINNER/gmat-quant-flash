@@ -50,6 +50,17 @@
     font-size: clamp(14px, 3.8vw, 17px); line-height: 1.55; font-style: italic;
   }
   .example b { color: var(--ink); font-style: normal; }
+  .latex {
+    margin-top: 6px; font-size: clamp(26px, 7vw, 40px); font-weight: 700;
+    letter-spacing: .01em; text-align: center; line-height: 1.4;
+    font-family: "Times New Roman", Georgia, serif; font-style: italic;
+  }
+  .latex .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; }
+  .latex .frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 6px; }
+  .latex .frac > span:last-child { padding: 0 6px; }
+  .latex .sqrt-in { text-decoration: overline; }
+  .latex sup, .latex sub { font-size: .62em; }
+  .formula-en { margin-top: 12px; text-align: center; color: var(--muted); font-size: clamp(14px, 3.8vw, 17px); font-weight: 600; }
   .cat-tag {
     display: inline-block; margin-top: 14px; font-size: 11px; color: var(--tag-fg);
     background: var(--tag-bg); padding: 2px 10px; border-radius: 999px;
@@ -256,6 +267,27 @@ function renderThemeChips() {
   }
 }
 
+// ---------- 轻量 LaTeX 渲染（GMAT 公式子集，零依赖） ----------
+const LATEX_SYMBOLS = {
+  "\\pi": "π", "\\pm": "±", "\\times": "×", "\\div": "÷", "\\cdot": "·",
+  "\\le": "≤", "\\ge": "≥", "\\ne": "≠", "\\approx": "≈", "\\infty": "∞",
+  "\\theta": "θ", "\\Delta": "Δ", "\\cup": "∪", "\\cap": "∩", "\\bar{x}": "x̄",
+  "\\bar{v}": "v̄", "\\%": "%",
+};
+function renderLatex(src) {
+  let s = String(src).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  // 先 \sqrt（参数无嵌套），再 \frac——避免 sqrt 的花括号干扰 frac 的参数匹配
+  s = s.replace(/\\sqrt\{([^{}]*)\}/g, '√<span class="sqrt-in">$1</span>');
+  s = s.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, '<span class="frac"><span>$1</span><span>$2</span></span>');
+  // 符号映射
+  for (const [k, v] of Object.entries(LATEX_SYMBOLS)) s = s.split(k).join(v);
+  // 上下标：^{...} 与 _{...}
+  s = s.replace(/\^\{([^}]*)\}/g, "<sup>$1</sup>").replace(/_\{([^}]*)\}/g, "<sub>$1</sub>");
+  // 单字符上下标（不含括号捕获，避免吃进后续字符）
+  s = s.replace(/\^([0-9])/g, "<sup>$1</sup>").replace(/_([0-9a-z])/g, "<sub>$1</sub>");
+  return s;
+}
+
 // ---------- 状态 ----------
 function todayStr() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate(); }
 function defaultState() {
@@ -283,26 +315,33 @@ let streak = 0;         // 连对计数（会话级，退出清零）
 function daysSince(last) { return Math.floor((Date.now() - new Date(last).getTime()) / DAY); }
 function buildQueue() {
   const now = todayStr();
-  const q = [];
-  const seen = new Set();
+  const groups = {};
+  for (const c of state.cats) groups[c] = [];
   for (let i = 0; i < WORDS.length; i++) {
     if (!state.cats.includes(WORDS[i].cat)) continue;
     const b = state.box[i] || 0;
     if (b === 4) continue;                          // 已掌握
-    if (b === 0) { q.push(i); continue; }           // 新词 / 未掌握
+    if (b === 0) { groups[WORDS[i].cat].push(i); continue; }  // 新词 / 未掌握
     const dueDays = BOX_DAYS[b] || 7;
-    if (daysSince(state.last[i] || now) >= dueDays) q.push(i);  // 到期复习
+    if (daysSince(state.last[i] || now) >= dueDays) groups[WORDS[i].cat].push(i);  // 到期复习
   }
-  // 今日错词优先：排前面，权重 2（出现两次）
+  // 今日错词加练：组首、组尾各一次，洗牌后自然分开
   for (const i of Object.keys(state.wrongToday)) {
     const idx = Number(i);
     if (state.box[idx] === 4 || !state.cats.includes(WORDS[idx].cat)) continue;
-    if (!seen.has(idx)) { q.unshift(idx); q.push(idx); seen.add(idx); }
+    groups[WORDS[idx].cat].unshift(idx);
+    groups[WORDS[idx].cat].push(idx);
   }
-  // 洗牌
-  for (let i = q.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [q[i], q[j]] = [q[j], q[i]];
+  // 组内洗牌，组间洗牌：同专题连续出题，专题之间随机
+  const cats = state.cats.filter(c => groups[c].length).sort(() => Math.random() - .5);
+  const q = [];
+  for (const c of cats) {
+    const g = groups[c];
+    for (let i = g.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [g[i], g[j]] = [g[j], g[i]];
+    }
+    q.push(...g);
   }
   queue = q;
   sessionWrong = [];
@@ -327,10 +366,17 @@ function nextQuestion() {
   qz.classList.remove("quiz-anim");
   void qz.offsetWidth;   // 强制 reflow，重启动画
   qz.classList.add("quiz-anim");
-  document.getElementById("en").textContent = WORDS[current].en;
+  const w = WORDS[current];
+  const enEl = document.getElementById("en");
   const ex = document.getElementById("example");
-  ex.innerHTML = highlightEn(WORDS[current].example, WORDS[current].en);
-  document.getElementById("catTag").textContent = CATEGORIES[WORDS[current].cat];
+  if (w.latex) {
+    enEl.innerHTML = `<div class="latex">${renderLatex(w.latex)}</div><div class="formula-en">${w.en}</div>`;
+    ex.innerHTML = "";
+  } else {
+    enEl.textContent = w.en;
+    ex.innerHTML = highlightEn(w.example, w.en);
+  }
+  document.getElementById("catTag").textContent = CATEGORIES[w.cat];
   const box = document.getElementById("options");
   box.innerHTML = "";
   opts.forEach((o, k) => {

@@ -75,21 +75,39 @@ function assert(cond, msg) {
 }
 
 // 1. 词库字段完整、启动后队列 = 全部词（全新 box 0）
-assert(WORDS.length === 130, `词库 130 词，实际 ${WORDS.length}`);
+assert(WORDS.length === 185, `词库 185 条，实际 ${WORDS.length}`);
+let formulaCount = 0;
 for (const w of WORDS) {
-  assert(w.en && w.cn && w.hint && w.example && w.cat, `词条字段完整: ${w.en}`);
+  assert(w.en && w.cn && w.hint && (w.example || w.latex) && w.cat, `词条字段完整: ${w.en}`);
   assert(CATEGORIES[w.cat], `cat 合法: ${w.en} → ${w.cat}`);
+  if (w.latex) formulaCount++;
 }
+assert(formulaCount >= 50, `公式题至少 50 条，实际 ${formulaCount}`);
 assert(Object.keys(state.box).length === 0, "初始 box 为空");
 assert(cur() !== null && q().length === WORDS.length - 1, `首题已出，队列剩 ${q().length}`);
+
+// 1b. 专题连续性：初始队列按 cat 分组，专题切换次数 = 组数-1
+{
+  const sq = q();
+  const catSeq = sq.map(i => WORDS[i].cat);
+  let switches = 0;
+  for (let i = 1; i < catSeq.length; i++) if (catSeq[i] !== catSeq[i-1]) switches++;
+  assert(switches <= 5, `同专题连续出题：切换次数 ${switches} ≤ 5`);
+}
 
 // 2. 出题：4 选项、恰一个正确、题目内容匹配
 const optsEl = registry["options"];
 assert(optsEl.children.length === 4, `4 个选项，实际 ${optsEl.children.length}`);
 const correctIdx = optsEl.children.findIndex((b) => b.textContent === WORDS[cur()].cn);
 assert(correctIdx >= 0, "正确选项存在");
-assert(registry["en"].textContent === WORDS[cur()].en, "英文概念显示正确");
-assert(registry["example"].innerHTML.includes("<b>"), "例句高亮生效");
+if (WORDS[cur()].latex) {
+  assert(registry["en"].innerHTML.includes("latex"), "公式题面渲染 LaTeX");
+  assert(registry["example"].innerHTML === "", "公式题不显示例句");
+  assert(!registry["en"].innerHTML.includes("\\frac{"), "LaTeX 已渲染无残留反斜杠");
+} else {
+  assert(registry["en"].textContent === WORDS[cur()].en, "英文概念显示正确");
+  assert(registry["example"].innerHTML.includes("<b>"), "例句高亮生效");
+}
 
 // 3. 答对：box → 1，doneToday → 1，停留当前题并出现「继续」按钮（手动进入下一题）
 const firstWord = cur();

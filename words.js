@@ -144,6 +144,74 @@ const WORDS = [
   { en: "deposit", cn: "存款", hint: "存进账户的钱；本金类", example: "Jane deposits $1,500 into an account. Her balance is now $6,200. What was her previous balance?", cat: "word" },
   { en: "installment", cn: "分期付款", hint: "总价分多次付", example: "A $1,200 phone is paid in 6 equal installments. How much is each installment?", cat: "word" },
   { en: "per capita", cn: "人均", hint: "总量÷人数", example: "A country of 40 million people has a GDP of $800 billion. What is the per capita GDP?", cat: "word" },
+
+  // ===================== 公式题（latex 渲染，无 example） =====================
+  // number 数列与幂
+  { en: "general term of arithmetic sequence", cn: "等差数列通项", latex: "a_n = a_1 + (n-1)d", hint: "首项 a₁、公差 d；连续整数 d=1，连续奇偶 d=2", cat: "number" },
+  { en: "number of terms", cn: "等差数列项数", latex: "n = \\frac{a_n - a_1}{d} + 1", hint: "那个 +1 最容易忘；先求两端差再除公差", cat: "number" },
+  { en: "sum of arithmetic sequence", cn: "等差数列求和", latex: "S_n = \\frac{(a_1 + a_n) \\cdot n}{2}", hint: "首尾和×项数÷2，别一个个硬加", cat: "number" },
+  { en: "general term of geometric sequence", cn: "等比数列通项", latex: "a_n = a_1 \\cdot q^{n-1}", hint: "公比 q；翻倍问题 q=2，指数别差 1", cat: "number" },
+  { en: "sum of geometric sequence", cn: "等比数列求和", latex: "S_n = \\frac{a_1(1-q^n)}{1-q}", hint: "考得少但易忘，考前扫一眼", cat: "number" },
+  { en: "product rule of exponents", cn: "同底数幂相乘", latex: "a^m \\cdot a^n = a^{m+n}", hint: "同底相乘指数相加；底数不同先化同底", cat: "number" },
+  { en: "divisibility of 3 consecutive integers", cn: "三连续整数之积", latex: "(n-1) \\cdot n \\cdot (n+1) = 6k", hint: "必含一个 3 的倍数、至少一个偶数，积必被 6 整除", cat: "number" },
+
+  // algebra 坐标与方程
+  { en: "slope formula", cn: "斜率公式", latex: "m = \\frac{y_2 - y_1}{x_2 - x_1}", hint: "纵差÷横差；垂直两线斜率乘积 = −1", cat: "algebra" },
+  { en: "midpoint formula", cn: "中点公式", latex: "M = (\\frac{x_1+x_2}{2}, \\frac{y_1+y_2}{2})", hint: "两端坐标取平均", cat: "algebra" },
+  { en: "distance formula", cn: "两点距离", latex: "d = \\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}", hint: "勾股定理在坐标系里的分身", cat: "algebra" },
+  { en: "quadratic formula", cn: "二次方程求根", latex: "x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}", hint: "配不了方就套公式；先算判别式", cat: "algebra" },
+  { en: "discriminant", cn: "判别式", latex: "\\Delta = b^2 - 4ac", hint: ">0 两实根，=0 重根，<0 无实根", cat: "algebra" },
+  { en: "difference of squares", cn: "平方差公式", latex: "a^2 - b^2 = (a+b)(a-b)", hint: "看到平方差先分解，常能约分", cat: "algebra" },
+  { en: "perfect square expansion", cn: "完全平方公式", latex: "(a \\pm b)^2 = a^2 \\pm 2ab + b^2", hint: "展开中间项 2ab 别漏", cat: "algebra" },
+
+  // geometry 面积体积
+  { en: "Pythagorean theorem", cn: "勾股定理", latex: "a^2 + b^2 = c^2", hint: "直角三角形；c 是斜边，3-4-5 和 5-12-13 秒出", cat: "geometry" },
+  { en: "area of a circle", cn: "圆面积", latex: "A = \\pi r^2", hint: "半径平方乘 π；给直径先除 2", cat: "geometry" },
+  { en: "circumference", cn: "圆周长", latex: "C = 2\\pi r = \\pi d", hint: "周长里是半径的一次方", cat: "geometry" },
+  { en: "area of a sector", cn: "扇形面积", latex: "A = \\frac{\\theta}{360} \\cdot \\pi r^2", hint: "圆面积×圆心角占比", cat: "geometry" },
+  { en: "arc length", cn: "弧长", latex: "l = \\frac{\\theta}{360} \\cdot 2\\pi r", hint: "圆周长×圆心角占比", cat: "geometry" },
+  { en: "area of a triangle", cn: "三角形面积", latex: "A = \\frac{1}{2}bh", hint: "底×高÷2；等底等高面积相等", cat: "geometry" },
+  { en: "area of a trapezoid", cn: "梯形面积", latex: "A = \\frac{(a+b)h}{2}", hint: "上下底之和×高÷2", cat: "geometry" },
+  { en: "area of a rhombus", cn: "菱形面积", latex: "A = \\frac{d_1 \\cdot d_2}{2}", hint: "两对角线乘积÷2；对角线互相垂直", cat: "geometry" },
+  { en: "volume of a cylinder", cn: "圆柱体积", latex: "V = \\pi r^2 h", hint: "底面积×高", cat: "geometry" },
+  { en: "volume of a sphere", cn: "球体积", latex: "V = \\frac{4}{3}\\pi r^3", hint: "4/3 π r³；表面积 4πr²，别混", cat: "geometry" },
+  { en: "surface area of a sphere", cn: "球表面积", latex: "A = 4\\pi r^2", hint: "半径平方×4π", cat: "geometry" },
+  { en: "diagonal of a rectangular box", cn: "长方体对角线", latex: "d = \\sqrt{l^2 + w^2 + h^2}", hint: "三维勾股：长宽高平方和开根", cat: "geometry" },
+  { en: "sum of interior angles", cn: "多边形内角和", latex: "(n-2) \\cdot 180°", hint: "n 边形内角和；四边形 360°", cat: "geometry" },
+  { en: "number of diagonals", cn: "多边形对角线数", latex: "\\frac{n(n-3)}{2}", hint: "n 边形对角线条数", cat: "geometry" },
+  { en: "area of equilateral triangle", cn: "等边三角形面积", latex: "A = \\frac{\\sqrt{3}}{4}s^2", hint: "边长为 s；高 = (√3/2)s", cat: "geometry" },
+  { en: "45-45-90 triangle", cn: "等腰直角三角形边长比", latex: "1 : 1 : \\sqrt{2}", hint: "45°-45°-90°；斜边 = 直角边×√2", cat: "geometry" },
+  { en: "30-60-90 triangle", cn: "30-60-90 三角形边长比", latex: "1 : \\sqrt{3} : 2", hint: "短直角边 : 长直角边 : 斜边", cat: "geometry" },
+
+  // stats 统计与集合
+  { en: "mean formula", cn: "平均数公式", latex: "\\bar{x} = \\frac{sum}{n}", hint: "总和÷个数；给平均数先反推总和 S = n·x̄", cat: "stats" },
+  { en: "weighted average", cn: "加权平均", latex: "\\bar{x} = \\frac{n_1 x_1 + n_2 x_2}{n_1 + n_2}", hint: "各组(均值×个数)之和÷总个数", cat: "stats" },
+  { en: "range formula", cn: "极差", latex: "range = max - min", hint: "最大值−最小值；未知数取两头拉大极差", cat: "stats" },
+  { en: "scaling of standard deviation", cn: "标准差缩放规律", latex: "SD(kX) = k \\cdot SD(X)", hint: "整体乘 k：标准差乘 k、方差乘 k²；整体加减不变", cat: "stats" },
+  { en: "at least one in Venn diagram", cn: "韦恩图至少其一", latex: "A \\cup B = A + B - A \\cap B", hint: "两集合相加减重叠；四部分之和 = 总数", cat: "stats" },
+  { en: "neither in Venn diagram", cn: "韦恩图都不选", latex: "neither = total - (A + B - both)", hint: "总数−至少其一；先换成占总数的比例", cat: "stats" },
+  { en: "number of subsets", cn: "子集个数", latex: "2^n", hint: "n 元素集合有 2ⁿ 个子集；空集也算", cat: "stats" },
+
+  // prob 概率与组合
+  { en: "probability formula", cn: "概率定义", latex: "P = \\frac{favorable}{total}", hint: "有利结果÷总结果；先数清总数", cat: "prob" },
+  { en: "mutually exclusive probability", cn: "互斥事件概率", latex: "P(A \\cup B) = P(A) + P(B)", hint: "不能同时发生，直接相加", cat: "prob" },
+  { en: "independent probability", cn: "独立事件概率", latex: "P(A \\cap B) = P(A) \\cdot P(B)", hint: "互不影响，相乘；非独立别用", cat: "prob" },
+  { en: "at least one probability", cn: "至少一个的概率", latex: "P(\\ge 1) = 1 - P(none)", hint: "正难则反：1−一个都没有；at least 先想反面", cat: "prob" },
+  { en: "permutation formula", cn: "排列公式", latex: "A(m,n) = \\frac{m!}{(m-n)!}", hint: "顺序重要（排队、密码）；从 m 往下连乘 n 个数", cat: "prob" },
+  { en: "combination formula", cn: "组合公式", latex: "C(m,n) = \\frac{m!}{n!(m-n)!}", hint: "顺序不重要（选人成组）；= 排列÷n!", cat: "prob" },
+  { en: "permutation with repeats", cn: "重复元素全排列", latex: "\\frac{n!}{p! \\cdot q!}", hint: "有重复元素先全排再去重", cat: "prob" },
+
+  // word 文字题公式
+  { en: "percent change", cn: "百分比变化", latex: "\\frac{new - old}{old} \\times 100\\%", hint: "变化量÷原值；increase/decrease 都除以 old", cat: "word" },
+  { en: "successive percent change", cn: "连续百分比变化", latex: "x(1 \\pm p\\%)^n", hint: "连乘 (1±p%)，不要逐次加减", cat: "word" },
+  { en: "discount formula", cn: "折扣", latex: "price \\cdot (1 - d\\%)", hint: "off 20% = 打八折 = 乘 0.8", cat: "word" },
+  { en: "markup formula", cn: "加价", latex: "cost \\cdot (1 + m\\%)", hint: "成本×(1+加价率)=售价", cat: "word" },
+  { en: "simple interest", cn: "单利", latex: "I = P \\cdot r \\cdot t", hint: "只对本金计息；t 按年", cat: "word" },
+  { en: "compound interest", cn: "复利", latex: "A = P(1 + r)^t", hint: "利滚利；每期乘 (1+r)", cat: "word" },
+  { en: "distance rate time", cn: "路程速度时间", latex: "d = r \\cdot t", hint: "距离=速度×时间；三个量知二求一", cat: "word" },
+  { en: "average speed equal halves", cn: "平均速度（等距两段）", latex: "\\bar{v} = \\frac{2ab}{a+b}", hint: "总路程÷总时间；不是 (a+b)/2，等距必用调和平均", cat: "word" },
+  { en: "combined work rate", cn: "合做速率", latex: "\\frac{1}{T} = \\frac{1}{a} + \\frac{1}{b}", hint: "一起干：效率相加，时间是倒数", cat: "word" },
+  { en: "mixture equation", cn: "浓度混合", latex: "c_1 v_1 + c_2 v_2 = c(v_1 + v_2)", hint: "溶质守恒列方程", cat: "word" },
 ];
 
 // 专题中文名（index.html 引用）
